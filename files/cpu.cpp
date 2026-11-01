@@ -221,16 +221,39 @@ void Cpu::step() {
         case 0XC3:
             m_cpuState.set_pc((m_memoryBus.read(m_cpuState.get_pc()+2)<<8)|m_memoryBus.read(m_cpuState.get_pc()+1));
             break;
-            // 0x20: JR NZ, e8 (it gives a distance to move)
-        case 0x20:{
-            m_cpuState.set_pc(m_cpuState.get_pc()+1);
-            auto offset = static_cast<std::int8_t>(m_memoryBus.read(m_cpuState.get_pc()));
-            m_cpuState.set_pc(m_cpuState.get_pc()+1);
-            if(m_cpuState.get_flag(FlagType::Z)==false)m_cpuState.set_pc(m_cpuState.get_pc()+offset);
-            break;
+        // 0x20: JR NZ, e8 (set distance only when Z is not zero)
+        // 0x28: JR Z, e8 (set distance only when Z is zero)
+        // 0x30: JR NC, e8 (set distance only when not carry)
+        // 0x38: JR C, e8 (set distance only when carry)
+        case 0x20:
+        case 0x28:
+        case 0x30:
+        case 0x38:{
 
-        // 0x06 - LD B, n8 (load an 8-bit value into register B)
+            std::uint8_t opcode = static_cast<unsigned int>(byte);
+            if ((opcode==0x20&&!m_cpuState.get_flag(FlagType::Z))||
+                (opcode==0x28&&m_cpuState.get_flag(FlagType::Z))||
+                (opcode==0x30&&!m_cpuState.get_flag(FlagType::C))||
+                (opcode==0x38&&m_cpuState.get_flag(FlagType::C))) {
+
+                m_cpuState.set_pc(m_cpuState.get_pc()+1);
+                auto offset = static_cast<std::int8_t>(m_memoryBus.read(m_cpuState.get_pc()));
+                m_cpuState.set_pc(m_cpuState.get_pc()+1);
+                m_cpuState.set_pc(m_cpuState.get_pc()+offset);
+                break;
+
+            }
+
+            m_cpuState.set_pc(m_cpuState.get_pc()+2);
+            break;
         }
+        // JR unconditional (pc + 2 + offset)
+        case 0x18: {
+            auto offset = static_cast<std::int8_t>(m_memoryBus.read(m_cpuState.get_pc()+1));
+            m_cpuState.set_pc(m_cpuState.get_pc()+2+offset);
+            break;
+        }
+        // 0x06 - LD B, n8 (load an 8-bit value into register B)
         case 0x06:
             m_cpuState.set_b(m_memoryBus.read(m_cpuState.get_pc()+1));
             m_cpuState.set_pc(m_cpuState.get_pc()+2);
@@ -509,10 +532,60 @@ void Cpu::step() {
             break;
         }
 
+        // CALL condition (C4, CC, D4, DC) (NZ,Z,NC,C) , a16
+        case 0xC4:
+        case 0xCC:
+        case 0xD4:
+        case 0xDC:{
+
+            std::uint8_t opcode = static_cast<unsigned int>(byte);
+            if ((opcode==0xC4&&!m_cpuState.get_flag(FlagType::Z))||
+                (opcode==0xCC&&m_cpuState.get_flag(FlagType::Z))||
+                (opcode==0xD4&&!m_cpuState.get_flag(FlagType::C))||
+                (opcode==0xDC&&m_cpuState.get_flag(FlagType::C))) {
+
+                const std::uint16_t return_address = m_cpuState.get_pc()+3;
+
+                m_cpuState.set_pc((
+                    m_memoryBus.read(m_cpuState.get_pc()+2)<<8)|m_memoryBus.read(m_cpuState.get_pc()+1));
+
+                m_cpuState.set_sp(m_cpuState.get_sp()-1);
+                // High Byte (shift 8 bytes right because during conversion the low bytes still remain)
+                m_memoryBus.write(m_cpuState.get_sp(), return_address>>8);
+                m_cpuState.set_sp(m_cpuState.get_sp()-1);
+                m_memoryBus.write(m_cpuState.get_sp(), return_address&0x00FF); // Low Byte
+                break;
+            }
+
+            m_cpuState.set_pc(m_cpuState.get_pc()+3);
+            break;
+        }
+
         // RET (return after Subroutine)
         case 0xC9: {
             m_cpuState.set_pc((m_memoryBus.read(m_cpuState.get_sp()+1)<<8)|m_memoryBus.read(m_cpuState.get_sp()));
             m_cpuState.set_sp(m_cpuState.get_sp()+2);
+            break;
+        }
+
+        // RET condition (C0, C8, D0, D8) (NZ,Z,NC,C)
+        case 0xC0:
+        case 0xC8:
+        case 0xD0:
+        case 0xD8: {
+
+            std::uint8_t opcode = static_cast<unsigned int>(byte);
+            if ((opcode==0xC0&&!m_cpuState.get_flag(FlagType::Z))||
+                (opcode==0xC8&&m_cpuState.get_flag(FlagType::Z))||
+                (opcode==0xD0&&!m_cpuState.get_flag(FlagType::C))||
+                (opcode==0xD8&&m_cpuState.get_flag(FlagType::C))){
+
+                m_cpuState.set_pc((m_memoryBus.read(m_cpuState.get_sp()+1)<<8)|m_memoryBus.read(m_cpuState.get_sp()));
+                m_cpuState.set_sp(m_cpuState.get_sp()+2);
+                break;
+            }
+
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
             break;
         }
 
@@ -528,6 +601,32 @@ void Cpu::step() {
             arithmeticOperation(byte, true);
             // No increment needed, because functions does it!
             break;
+
+        // JP condition (C2, CA, D2, DA), a16
+        case 0xC2:
+        case 0xCA:
+        case 0xD2:
+        case 0xDA: {
+
+            std::uint8_t opcode = static_cast<unsigned int>(byte);
+            if ((opcode==0xC2&&!m_cpuState.get_flag(FlagType::Z))||
+                (opcode==0xCA&&m_cpuState.get_flag(FlagType::Z))||
+                (opcode==0xD2&&!m_cpuState.get_flag(FlagType::C))||
+                (opcode==0xDA&&m_cpuState.get_flag(FlagType::C))) {
+
+                m_cpuState.set_pc((m_memoryBus.read(m_cpuState.get_pc()+2) << 8) | m_memoryBus.read(m_cpuState.get_pc()+1));
+                break;
+            }
+
+            m_cpuState.set_pc(m_cpuState.get_pc()+3);
+            break;
+        }
+
+        // JP HL
+        case 0xE9:
+            m_cpuState.set_pc(m_cpuState.get_hl());
+            break;
+        break;
         default:
             throw std::runtime_error(std::format("Unsupported opcode 0x{:02X} at address 0x{:04X}", byte, m_cpuState.get_pc()));
     }
