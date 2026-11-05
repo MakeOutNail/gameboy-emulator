@@ -450,6 +450,20 @@ void Cpu::step() {
             m_cpuState.set_sp((m_memoryBus.read(m_cpuState.get_pc()+1)<<8) | m_memoryBus.read(m_cpuState.get_pc()));
             m_cpuState.set_pc(m_cpuState.get_pc()+2);
             break;
+        // LD BC, n16; LOAD 16 BIT INTO REGISTER BC
+        case 0x01:
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            // shift the upper byte to the left and attach them with the or operator
+            m_cpuState.set_bc((m_memoryBus.read(m_cpuState.get_pc()+1)<<8) | m_memoryBus.read(m_cpuState.get_pc()));
+            m_cpuState.set_pc(m_cpuState.get_pc()+2);
+            break;
+        // LD DE, n16; LOAD 16 BIT INTO REGISTER DE
+        case 0x11:
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            // shift the upper byte to the left and attach them with the or operator
+            m_cpuState.set_de((m_memoryBus.read(m_cpuState.get_pc()+1)<<8) | m_memoryBus.read(m_cpuState.get_pc()));
+            m_cpuState.set_pc(m_cpuState.get_pc()+2);
+            break;
         // push BC to the stack
         case 0xC5:
             m_cpuState.set_sp(m_cpuState.get_sp()-1);
@@ -626,7 +640,167 @@ void Cpu::step() {
         case 0xE9:
             m_cpuState.set_pc(m_cpuState.get_hl());
             break;
-        break;
+
+        // INC BC
+        case 0x03:
+            m_cpuState.set_bc(m_cpuState.get_bc()+1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        // INC DE
+        case 0x13:
+            m_cpuState.set_de(m_cpuState.get_de()+1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        // INC HL
+        case 0x23:
+            m_cpuState.set_hl(m_cpuState.get_hl()+1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        // INC SP
+        case 0x33:
+            m_cpuState.set_sp(m_cpuState.get_sp()+1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        // DEC BC
+        case 0x0B:
+            m_cpuState.set_bc(m_cpuState.get_bc()-1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        // DEC DE
+        case 0x1B:
+            m_cpuState.set_de(m_cpuState.get_de()-1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        // DEC HL
+        case 0x2B:
+            m_cpuState.set_hl(m_cpuState.get_hl()-1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        // DEC SP
+        case 0x3B:
+            m_cpuState.set_sp(m_cpuState.get_sp()-1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        // ADD HL, BC
+        case 0x09: {
+
+            // False because it is an addition
+            m_cpuState.set_flag(FlagType::N, false);
+
+            const std::uint16_t r16 =   m_cpuState.get_bc();
+
+            m_cpuState.set_flag(FlagType::C, 0xFFFF < m_cpuState.get_hl()+r16);
+            m_cpuState.set_flag(FlagType::H, (m_cpuState.get_hl()&0x0FFF) + (r16&0x0FFF)>0x0FFF);
+
+            m_cpuState.set_hl(m_cpuState.get_hl()+r16);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
+
+        // ADD HL, DE
+        case 0x19: {
+            // False because it is an addition
+            m_cpuState.set_flag(FlagType::N, false);
+
+            const std::uint16_t r16 =   m_cpuState.get_de();
+
+            m_cpuState.set_flag(FlagType::C, 0xFFFF < m_cpuState.get_hl()+r16);
+            m_cpuState.set_flag(FlagType::H, (m_cpuState.get_hl()&0x0FFF) + (r16&0x0FFF)>0x0FFF);
+
+            m_cpuState.set_hl(m_cpuState.get_hl()+r16);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
+        // ADD HL, HL
+        case 0x29: {
+
+            // False because it is an addition
+            m_cpuState.set_flag(FlagType::N, false);
+
+            const std::uint16_t r16 =   m_cpuState.get_hl();
+
+            m_cpuState.set_flag(FlagType::C, 0xFFFF < m_cpuState.get_hl()+r16);
+            m_cpuState.set_flag(FlagType::H, (m_cpuState.get_hl()&0x0FFF) + (r16&0x0FFF)>0x0FFF);
+
+            m_cpuState.set_hl(m_cpuState.get_hl()+r16);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
+
+        // ADD HL, SP
+        case 0x39: {
+            // False because it is an addition
+            m_cpuState.set_flag(FlagType::N, false);
+
+            const std::uint16_t r16 =   m_cpuState.get_sp();
+
+            m_cpuState.set_flag(FlagType::C, 0xFFFF < m_cpuState.get_hl()+r16);
+            m_cpuState.set_flag(FlagType::H, (m_cpuState.get_hl()&0x0FFF) + (r16&0x0FFF)>0x0FFF);
+
+            m_cpuState.set_hl(m_cpuState.get_hl()+r16);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
+
+        // LD [BC], A
+        case 0x02: {
+            m_memoryBus.write(m_cpuState.get_bc(), m_cpuState.get_a());
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
+
+        // LD [DE], A
+        case 0x12: {
+            m_memoryBus.write(m_cpuState.get_de(), m_cpuState.get_a());
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
+
+        // LD A,[BC]
+        case 0x0A:{
+            m_cpuState.set_a(m_memoryBus.read(m_cpuState.get_bc()));
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
+
+        // LD A,[DE]
+        case 0x1A:{
+            m_cpuState.set_a(m_memoryBus.read(m_cpuState.get_de()));
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
+
+        // LD [HL+], A
+        case 0x22: {
+            m_memoryBus.write(m_cpuState.get_hl(), m_cpuState.get_a());
+            m_cpuState.set_hl(m_cpuState.get_hl()+1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
+
+        // LD A, [HL+]
+        case 0x2A: {
+            m_cpuState.set_a(m_memoryBus.read(m_cpuState.get_hl()));
+            m_cpuState.set_hl(m_cpuState.get_hl()+1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
+
+        // LD [HL-], A
+        case 0x32: {
+            m_memoryBus.write(m_cpuState.get_hl(), m_cpuState.get_a());
+            m_cpuState.set_hl(m_cpuState.get_hl()-1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
+
+        // LD A, [HL-]
+        case 0x3A: {
+            m_cpuState.set_a(m_memoryBus.read(m_cpuState.get_hl()));
+            m_cpuState.set_hl(m_cpuState.get_hl()-1);
+            m_cpuState.set_pc(m_cpuState.get_pc()+1);
+            break;
+        }
         default:
             throw std::runtime_error(std::format("Unsupported opcode 0x{:02X} at address 0x{:04X}", byte, m_cpuState.get_pc()));
     }
