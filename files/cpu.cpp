@@ -801,6 +801,659 @@ void Cpu::step() {
             m_cpuState.set_pc(m_cpuState.get_pc()+1);
             break;
         }
+        // RLC (Rotate Left Circular), RRC (Rotate Right Circular)
+        case 0xCB: {
+            switch (m_memoryBus.read(m_cpuState.get_pc()+1)) {
+                // RLC B
+                case 0x00: {
+                    std::uint8_t old_b = m_cpuState.get_b();
+                    m_cpuState.set_b((old_b << 1) | (old_b >> 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_b()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_b>>7)==1);
+                    break;
+                }
+                // RLC C
+                case 0x01: {
+                    std::uint8_t old_c = m_cpuState.get_c();
+                    m_cpuState.set_c((old_c << 1) | (old_c >> 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_c()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_c>>7)==1);
+                    break;
+                }
+                // RLC D
+                case 0x02: {
+                    std::uint8_t old_d = m_cpuState.get_d();
+                    m_cpuState.set_d((old_d << 1) | (old_d >> 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_d()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_d>>7)==1);
+                    break;
+                }
+
+                // RLC E
+                case 0x03: {
+                    std::uint8_t old_e = m_cpuState.get_e();
+                    m_cpuState.set_e((old_e << 1) | (old_e >> 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_e()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_e>>7)==1);
+                    break;
+                }
+                // RLC H
+                case 0x04: {
+                    std::uint8_t old_h = m_cpuState.get_h();
+                    m_cpuState.set_h((old_h << 1) | (old_h >> 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_h()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_h>>7)==1);
+                    break;
+                }
+
+                // RLC L
+                case 0x05: {
+                    std::uint8_t old_l = m_cpuState.get_l();
+                    m_cpuState.set_l((old_l << 1) | (old_l >> 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_l()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_l>>7)==1);
+                    break;
+                }
+                // RLC HL
+                case 0x06: {
+                    std::uint8_t old_hl = m_memoryBus.read(m_cpuState.get_hl());
+                    m_memoryBus.write(m_cpuState.get_hl(), (old_hl << 1) | (old_hl >> 7));
+                    m_cpuState.set_flag(FlagType::Z, m_memoryBus.read(m_cpuState.get_hl())==0);
+                    m_cpuState.set_flag(FlagType::C,(old_hl>>7)==1);
+                    break;
+                }
+                // RLC A
+                case 0x07: {
+                    std::uint8_t old_a = m_cpuState.get_a();
+                    m_cpuState.set_a((old_a << 1) | (old_a >> 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_a()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_a>>7)==1);
+                    break;
+                }
+
+                // RRC B
+                case 0x08: {
+                    std::uint8_t old_b = m_cpuState.get_b();
+                    m_cpuState.set_b((old_b>>1)|(old_b << 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_b()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_b&0b00000001)!=0);
+                    break;
+                }
+                // RRC C
+                case 0x09: {
+                    std::uint8_t old_c = m_cpuState.get_c();
+                    m_cpuState.set_c((old_c>>1)|(old_c << 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_c()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_c&0b00000001)!=0);
+                    break;
+                }
+                // RRC D
+                case 0x0A: {
+                    std::uint8_t old_d = m_cpuState.get_d();
+                    m_cpuState.set_d((old_d>>1)|(old_d << 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_d()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_d&0b00000001)!=0);
+                    break;
+                }
+
+                // RRC E
+                case 0x0B: {
+                    std::uint8_t old_e = m_cpuState.get_e();
+                    m_cpuState.set_e((old_e>>1)|(old_e << 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_e()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_e&0b00000001)!=0);
+                    break;
+                }
+
+                // RRC H
+                case 0x0C: {
+                    std::uint8_t old_h = m_cpuState.get_h();
+                    m_cpuState.set_h((old_h>>1)|(old_h << 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_h()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_h&0b00000001)!=0);
+                    break;
+                }
+
+                // RRC L
+                case 0x0D: {
+                    std::uint8_t old_l = m_cpuState.get_l();
+                    m_cpuState.set_l((old_l>>1)|(old_l << 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_l()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_l&0b00000001)!=0);
+                    break;
+                }
+
+                // RRC [HL]
+                case 0x0E: {
+                    std::uint8_t old_hl = m_memoryBus.read(m_cpuState.get_hl());
+                    m_memoryBus.write(m_cpuState.get_hl(), (old_hl>>1)|(old_hl << 7));
+                    m_cpuState.set_flag(FlagType::Z, m_memoryBus.read(m_cpuState.get_hl())==0);
+                    m_cpuState.set_flag(FlagType::C,(old_hl&0b00000001)!=0);
+                    break;
+                }
+
+                // RRC A
+                case 0x0F: {
+                    std::uint8_t old_a = m_cpuState.get_a();
+                    m_cpuState.set_a((old_a>>1)|(old_a << 7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_a()==0);
+                    m_cpuState.set_flag(FlagType::C,(old_a&0b00000001)!=0);
+                    break;
+                }
+
+                // RL B
+                case 0x10: {
+                    std::uint8_t old_b = m_cpuState.get_b();
+                    // Add OLD CARRY to beginning of the number
+                    m_cpuState.set_b((old_b<<1)|(m_cpuState.get_flag(FlagType::C)?1:0));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_b()==0);
+                    // Set the carry based on the last bit
+                    m_cpuState.set_flag(FlagType::C,(old_b&0b10000000)==0b10000000);
+                    break;
+                }
+
+                // RL C
+                case 0x11: {
+                    std::uint8_t old_c = m_cpuState.get_c();
+                    // Add OLD CARRY to beginning of the number
+                    m_cpuState.set_c((old_c<<1)|(m_cpuState.get_flag(FlagType::C)?1:0));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_c()==0);
+                    // Set the carry based on the last bit
+                    m_cpuState.set_flag(FlagType::C,(old_c&0b10000000)==0b10000000);
+                    break;
+                }
+
+
+                // RL D
+                case 0x12: {
+                    std::uint8_t old_d = m_cpuState.get_d();
+                    // Add OLD CARRY to bit 0
+                    m_cpuState.set_d((old_d<<1)|(m_cpuState.get_flag(FlagType::C)?1:0));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_d()==0);
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C,(old_d&0b10000000)==0b10000000);
+                    break;
+                }
+
+                // RL E
+                case 0x13: {
+                    std::uint8_t old_e = m_cpuState.get_e();
+                    // Add OLD CARRY to bit 0
+                    m_cpuState.set_e((old_e<<1)|(m_cpuState.get_flag(FlagType::C)?1:0));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_e()==0);
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C,(old_e&0b10000000)==0b10000000);
+                    break;
+                }
+
+                // RL H
+                case 0x14: {
+                    std::uint8_t old_h = m_cpuState.get_h();
+                    // Add OLD CARRY to bit 0
+                    m_cpuState.set_h((old_h<<1)|(m_cpuState.get_flag(FlagType::C)?1:0));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_h()==0);
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C,(old_h&0b10000000)==0b10000000);
+                    break;
+                }
+
+                // RL L
+                case 0x15: {
+                    std::uint8_t old_l = m_cpuState.get_l();
+                    // Add OLD CARRY to bit 0
+                    m_cpuState.set_l((old_l<<1)|(m_cpuState.get_flag(FlagType::C)?1:0));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_l()==0);
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C,(old_l&0b10000000)==0b10000000);
+                    break;
+                }
+
+                // RL [HL]
+                case 0x16: {
+                    std::uint8_t old_hl = m_memoryBus.read(m_cpuState.get_hl());
+                    // Add OLD CARRY to bit 0
+                    m_memoryBus.write(m_cpuState.get_hl(), (old_hl<<1)|(m_cpuState.get_flag(FlagType::C)?1:0));
+                    m_cpuState.set_flag(FlagType::Z, m_memoryBus.read(m_cpuState.get_hl())==0);
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C,(old_hl&0b10000000)==0b10000000);
+                    break;
+                }
+
+                // RL A
+                case 0x17: {
+                    std::uint8_t old_a = m_cpuState.get_a();
+                    // Add OLD CARRY to bit 0
+                    m_cpuState.set_a((old_a<<1)|(m_cpuState.get_flag(FlagType::C)?1:0));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_a()==0);
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C,(old_a&0b10000000)==0b10000000);
+                    break;
+                }
+                //  RR B
+                case 0x18: {
+                    std::uint8_t old_b = m_cpuState.get_b();
+                    // add OLD CARRY TO bit 7
+                    m_cpuState.set_b((old_b>>1)|((m_cpuState.get_flag(FlagType::C)?1:0)<<7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_b()==0);
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_b&0b00000001)==0b00000001);
+                    break;
+                }
+
+
+                //  RR C
+                case 0x19: {
+                    std::uint8_t old_c = m_cpuState.get_c();
+                    // add OLD CARRY TO bit 7
+                    m_cpuState.set_c((old_c>>1)|((m_cpuState.get_flag(FlagType::C)?1:0)<<7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_c()==0);
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_c&0b00000001)==0b00000001);
+                    break;
+                }
+
+                //  RR D
+                case 0x1A: {
+                    std::uint8_t old_d = m_cpuState.get_d();
+                    // add OLD CARRY TO bit 7
+                    m_cpuState.set_d((old_d>>1)|((m_cpuState.get_flag(FlagType::C)?1:0)<<7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_d()==0);
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_d&0b00000001)==0b00000001);
+                    break;
+                }
+
+                //  RR E
+                case 0x1B: {
+                    std::uint8_t old_e = m_cpuState.get_e();
+                    // add OLD CARRY TO bit 7
+                    m_cpuState.set_e((old_e>>1)|((m_cpuState.get_flag(FlagType::C)?1:0)<<7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_e()==0);
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_e&0b00000001)==0b00000001);
+                    break;
+                }
+
+                //  RR H
+                case 0x1C: {
+                    std::uint8_t old_h = m_cpuState.get_h();
+                    // add OLD CARRY TO bit 7
+                    m_cpuState.set_h((old_h>>1)|((m_cpuState.get_flag(FlagType::C)?1:0)<<7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_h()==0);
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_h&0b00000001)==0b00000001);
+                    break;
+                }
+
+                //  RR L
+                case 0x1D: {
+                    std::uint8_t old_l = m_cpuState.get_l();
+                    // add OLD CARRY TO bit 7
+                    m_cpuState.set_l((old_l>>1)|((m_cpuState.get_flag(FlagType::C)?1:0)<<7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_l()==0);
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_l&0b00000001)==0b00000001);
+                    break;
+                }
+
+                //  RR [HL]
+                case 0x1E: {
+                    std::uint8_t old_hl = m_memoryBus.read(m_cpuState.get_hl());
+                    // add OLD CARRY TO bit 7
+                    m_memoryBus.write(m_cpuState.get_hl(), (old_hl>>1)|((m_cpuState.get_flag(FlagType::C)?1:0)<<7));
+                    m_cpuState.set_flag(FlagType::Z, m_memoryBus.read(m_cpuState.get_hl())==0);
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_hl&0b00000001)==0b00000001);
+                    break;
+                }
+
+                //  RR A
+                case 0x1F: {
+                    std::uint8_t old_a = m_cpuState.get_a();
+                    // add OLD CARRY TO bit 7
+                    m_cpuState.set_a((old_a>>1)|((m_cpuState.get_flag(FlagType::C)?1:0)<<7));
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_a()==0);
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_a&0b00000001)==0b00000001);
+                    break;
+                }
+
+                // SLA B
+                case 0x20: {
+                    std::uint8_t old_b = m_cpuState.get_b();
+
+                    m_cpuState.set_b((old_b<<1));
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C, (old_b&0b10000000)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_b()==0);
+                    break;
+                }
+
+                // SLA C
+                case 0x21: {
+                    std::uint8_t old_c = m_cpuState.get_c();
+
+                    m_cpuState.set_c((old_c<<1));
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C, (old_c&0b10000000)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_c()==0);
+                    break;
+                }
+
+                // SLA D
+                case 0x22: {
+                    std::uint8_t old_d = m_cpuState.get_d();
+
+                    m_cpuState.set_d((old_d<<1));
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C, (old_d&0b10000000)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_d()==0);
+                    break;
+                }
+
+                // SLA E
+                case 0x23: {
+                    std::uint8_t old_e = m_cpuState.get_e();
+
+                    m_cpuState.set_e((old_e<<1));
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C, (old_e&0b10000000)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_e()==0);
+                    break;
+                }
+
+                // SLA H
+                case 0x24: {
+                    std::uint8_t old_h = m_cpuState.get_h();
+
+                    m_cpuState.set_h((old_h<<1));
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C, (old_h&0b10000000)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_h()==0);
+                    break;
+                }
+
+                // SLA L
+                case 0x25: {
+                    std::uint8_t old_l = m_cpuState.get_l();
+
+                    m_cpuState.set_l((old_l<<1));
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C, (old_l&0b10000000)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_l()==0);
+                    break;
+                }
+
+                // SLA [HL]
+                case 0x26: {
+                    std::uint8_t old_hl = m_memoryBus.read(m_cpuState.get_hl());
+
+                    m_memoryBus.write(m_cpuState.get_hl(), (old_hl<<1));
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C, (old_hl&0b10000000)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_memoryBus.read(m_cpuState.get_hl())==0);
+                    break;
+                }
+
+                // SLA A
+                case 0x27: {
+                    std::uint8_t old_a = m_cpuState.get_a();
+
+                    m_cpuState.set_a((old_a<<1));
+                    // Set the carry based on the old bit 7
+                    m_cpuState.set_flag(FlagType::C, (old_a&0b10000000)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_a()==0);
+                    break;
+                }
+
+                // SRA B
+                case 0x28: {
+                    std::uint8_t old_b = m_cpuState.get_b();
+
+                    m_cpuState.set_b((old_b>>1) | (old_b&0b10000000));
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_b&0b00000001)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_b()==0);
+                    break;
+                }
+
+                // SRA C
+                case 0x29: {
+                    std::uint8_t old_c = m_cpuState.get_c();
+
+                    m_cpuState.set_c((old_c>>1) | (old_c&0b10000000));
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_c&0b00000001)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_c()==0);
+                    break;
+                }
+
+                // SRA D
+                case 0x2A: {
+                    std::uint8_t old_d = m_cpuState.get_d();
+
+                    m_cpuState.set_d((old_d>>1) | (old_d&0b10000000));
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_d&0b00000001)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_d()==0);
+                    break;
+                }
+
+                // SRA E
+                case 0x2B: {
+                    std::uint8_t old_e = m_cpuState.get_e();
+
+                    m_cpuState.set_e((old_e>>1) | (old_e&0b10000000));
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_e&0b00000001)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_e()==0);
+                    break;
+                }
+
+                // SRA H
+                case 0x2C: {
+                    std::uint8_t old_h = m_cpuState.get_h();
+
+                    m_cpuState.set_h((old_h>>1) | (old_h&0b10000000));
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_h&0b00000001)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_h()==0);
+                    break;
+                }
+
+                // SRA L
+                case 0x2D: {
+                    std::uint8_t old_l = m_cpuState.get_l();
+
+                    m_cpuState.set_l((old_l>>1) | (old_l&0b10000000));
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_l&0b00000001)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_l()==0);
+                    break;
+                }
+
+                // SRA [HL]
+                case 0x2E: {
+                    std::uint8_t old_hl = m_memoryBus.read(m_cpuState.get_hl());
+
+                    m_memoryBus.write(m_cpuState.get_hl(), (old_hl>>1) | (old_hl&0b10000000));
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_hl&0b00000001)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_memoryBus.read(m_cpuState.get_hl())==0);
+                    break;
+                }
+
+                // SRA A
+                case 0x2F: {
+                    std::uint8_t old_a = m_cpuState.get_a();
+
+                    m_cpuState.set_a((old_a>>1) | (old_a&0b10000000));
+                    // Set the carry based on the old bit 0
+                    m_cpuState.set_flag(FlagType::C, (old_a&0b00000001)!=0);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_a()==0);
+                    break;
+                }
+
+                // Swap B
+                case 0x30: {
+                    m_cpuState.set_b(m_cpuState.get_b()>>4 | m_cpuState.get_b()<<4);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_b()==0x00);
+                    m_cpuState.set_flag(FlagType::C, false);
+                    break;
+                }
+
+                // Swap C
+                case 0x31: {
+                    m_cpuState.set_c(m_cpuState.get_c()>>4 | m_cpuState.get_c()<<4);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_c()==0x00);
+                    m_cpuState.set_flag(FlagType::C, false);
+                    break;
+                }
+
+                // Swap D
+                case 0x32: {
+                    m_cpuState.set_d(m_cpuState.get_d()>>4 | m_cpuState.get_d()<<4);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_d()==0x00);
+                    m_cpuState.set_flag(FlagType::C, false);
+                    break;
+                }
+
+                // Swap E
+                case 0x33: {
+                    m_cpuState.set_e(m_cpuState.get_e()>>4 | m_cpuState.get_e()<<4);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_e()==0x00);
+                    m_cpuState.set_flag(FlagType::C, false);
+                    break;
+                }
+
+                // Swap H
+                case 0x34: {
+                    m_cpuState.set_h(m_cpuState.get_h()>>4 | m_cpuState.get_h()<<4);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_h()==0x00);
+                    m_cpuState.set_flag(FlagType::C, false);
+                    break;
+                }
+
+                // Swap L
+                case 0x35: {
+                    m_cpuState.set_l(m_cpuState.get_l()>>4 | m_cpuState.get_l()<<4);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_l()==0x00);
+                    m_cpuState.set_flag(FlagType::C, false);
+                    break;
+                }
+
+                // Swap [HL]
+                case 0x36: {
+                    m_memoryBus.write(m_cpuState.get_hl(), m_memoryBus.read(m_cpuState.get_hl())>>4 | m_memoryBus.read(m_cpuState.get_hl())<<4);
+                    m_cpuState.set_flag(FlagType::Z, m_memoryBus.read(m_cpuState.get_hl())==0x00);
+                    m_cpuState.set_flag(FlagType::C, false);
+                    break;
+                }
+
+                // Swap A
+                case 0x37: {
+                    m_cpuState.set_a(m_cpuState.get_a()>>4 | m_cpuState.get_a()<<4);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_a()==0x00);
+                    m_cpuState.set_flag(FlagType::C, false);
+                    break;
+                }
+
+                // SRL B
+                case 0x38: {
+
+                    std::uint8_t old_b = m_cpuState.get_b();
+                    m_cpuState.set_b(old_b>>1);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_b()==0x00);
+                    m_cpuState.set_flag(FlagType::C, (old_b&0b00000001)==1);
+                    break;
+                }
+
+                // SRL C
+                case 0x39: {
+
+                    std::uint8_t old_c = m_cpuState.get_c();
+                    m_cpuState.set_c(old_c>>1);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_c()==0x00);
+                    m_cpuState.set_flag(FlagType::C, (old_c&0b00000001)==1);
+                    break;
+                }
+
+                // SRL D
+                case 0x3A: {
+
+                    std::uint8_t old_d = m_cpuState.get_d();
+                    m_cpuState.set_d(old_d>>1);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_d()==0x00);
+                    m_cpuState.set_flag(FlagType::C, (old_d&0b00000001)==1);
+                    break;
+                }
+
+                // SRL E
+                case 0x3B: {
+
+                    std::uint8_t old_e = m_cpuState.get_e();
+                    m_cpuState.set_e(old_e>>1);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_e()==0x00);
+                    m_cpuState.set_flag(FlagType::C, (old_e&0b00000001)==1);
+                    break;
+                }
+
+                // SRL H
+                case 0x3C: {
+
+                    std::uint8_t old_h = m_cpuState.get_h();
+                    m_cpuState.set_h(old_h>>1);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_h()==0x00);
+                    m_cpuState.set_flag(FlagType::C, (old_h&0b00000001)==1);
+                    break;
+                }
+
+                // SRL L
+                case 0x3D: {
+
+                    std::uint8_t old_l = m_cpuState.get_l();
+                    m_cpuState.set_l(old_l>>1);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_l()==0x00);
+                    m_cpuState.set_flag(FlagType::C, (old_l&0b00000001)==1);
+                    break;
+                }
+
+                // SRL [HL]
+                case 0x3E: {
+
+                    std::uint8_t old_hl = m_memoryBus.read(m_cpuState.get_hl());
+                    m_memoryBus.write(m_cpuState.get_hl(), old_hl>>1);
+                    m_cpuState.set_flag(FlagType::Z, m_memoryBus.read(m_cpuState.get_hl())==0x00);
+                    m_cpuState.set_flag(FlagType::C, (old_hl&0b00000001)==1);
+                    break;
+                }
+
+                // SRL A
+                case 0x3F: {
+
+                    std::uint8_t old_a = m_cpuState.get_a();
+                    m_cpuState.set_a(old_a>>1);
+                    m_cpuState.set_flag(FlagType::Z, m_cpuState.get_a()==0x00);
+                    m_cpuState.set_flag(FlagType::C, (old_a&0b00000001)==1);
+                    break;
+                }
+
+                default:
+                    throw std::runtime_error(std::format("Unsupported opcode 0x{:02X} at address 0x{:04X}", byte, m_cpuState.get_pc()));
+
+            }
+
+
+
+            m_cpuState.set_flag(FlagType::N, false);
+            m_cpuState.set_flag(FlagType::H, false);
+            m_cpuState.set_pc(m_cpuState.get_pc()+2);
+            break;
+        }
+
+
+
+
         default:
             throw std::runtime_error(std::format("Unsupported opcode 0x{:02X} at address 0x{:04X}", byte, m_cpuState.get_pc()));
     }
